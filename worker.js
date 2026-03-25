@@ -20,6 +20,30 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
 
+    if (matches(url.pathname, "/.well-known/oauth-protected-resource/http")) {
+      const suffix = stripPrefix(
+        url.pathname,
+        "/.well-known/oauth-protected-resource/http"
+      );
+      const pathname =
+        suffix === "/"
+          ? "/.well-known/oauth-protected-resource"
+          : `/.well-known/oauth-protected-resource${suffix}`;
+      return proxy(request, HTTP_MCP_ORIGIN, pathname, url.search);
+    }
+
+    if (
+      url.pathname === "/.well-known/oauth-authorization-server/http" ||
+      url.pathname === "/.well-known/oauth-authorization-server/http/"
+    ) {
+      return proxy(
+        request,
+        HTTP_MCP_ORIGIN,
+        "/.well-known/oauth-authorization-server",
+        url.search
+      );
+    }
+
     if (matches(url.pathname, "/http")) {
       return proxy(
         request,
